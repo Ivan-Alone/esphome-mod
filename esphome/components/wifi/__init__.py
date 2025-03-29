@@ -36,6 +36,9 @@ from esphome.const import (
     CONF_TTLS_PHASE_2,
     CONF_ON_CONNECT,
     CONF_ON_DISCONNECT,
+    CONF_MAC_ADDRESS_CHANGE_VENDOR,
+    CONF_MAC_ADDRESS_SET,
+    CONF_MAC_ADDRESS_SET_AP,
 )
 from esphome.core import CORE, HexInt, coroutine_with_priority
 from esphome.components.esp32 import add_idf_sdkconfig_option, get_esp32_variant, const
@@ -291,9 +294,9 @@ CONFIG_SCHEMA = cv.All(
             cv.Optional(CONF_MANUAL_IP): STA_MANUAL_IP_SCHEMA,
             cv.Optional(CONF_EAP): EAP_AUTH_SCHEMA,
             cv.Optional(CONF_AP): wifi_network_ap,
-            cv.Optional("mac_address"): cv.mac_address,
-            cv.Optional("mac_address_ap"): cv.mac_address,
-            cv.Optional("mac_vendor"): cv.mac_prefix,
+            cv.Optional(CONF_MAC_ADDRESS_SET): cv.mac_address,
+            cv.Optional(CONF_MAC_ADDRESS_SET_AP): cv.mac_address,
+            cv.Optional(CONF_MAC_ADDRESS_CHANGE_VENDOR): cv.mac_prefix,
             cv.Optional(CONF_DOMAIN, default=".local"): cv.domain_name,
             cv.Optional(
                 CONF_REBOOT_TIMEOUT, default="15min"
@@ -402,13 +405,13 @@ def wifi_network(config, ap, static_ip):
 async def to_code(config):
     var = cg.new_Pvariable(config[CONF_ID])
     
-    if "mac_vendor" in config:
-        cg.add_define("MAC_ADDRESS_VENDOR", [HexInt(i) for i in config["mac_vendor"].parts])
+    if CONF_MAC_ADDRESS_CHANGE_VENDOR in config:
+        cg.add_define("MAC_ADDRESS_VENDOR", [HexInt(i) for i in config[CONF_MAC_ADDRESS_CHANGE_VENDOR].parts])
     else:
-        if "mac_address" in config:
-            cg.add_define("MAC_ADDRESS_CHANGED", [HexInt(i) for i in config["mac_address"].parts])
-        if "mac_address_ap" in config:
-            cg.add_define("MAC_ADDRESS_CHANGED_AP", [HexInt(i) for i in config["mac_address_ap"].parts])
+        if CONF_MAC_ADDRESS_SET in config:
+            cg.add_define("MAC_ADDRESS_CHANGED", [HexInt(i) for i in config[CONF_MAC_ADDRESS_SET].parts])
+        if CONF_MAC_ADDRESS_SET_AP in config:
+            cg.add_define("MAC_ADDRESS_CHANGED_AP", [HexInt(i) for i in config[CONF_MAC_ADDRESS_SET_AP].parts])
 
     cg.add(var.set_use_address(config[CONF_USE_ADDRESS]))
 
