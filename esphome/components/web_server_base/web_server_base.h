@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "esphome/core/component.h"
+#include "esphome/core/defines.h"
 
 #ifdef USE_ARDUINO
 #include <ESPAsyncWebServer.h>
@@ -88,6 +89,18 @@ class WebServerBase : public Component {
     this->server_ = std::make_shared<AsyncWebServer>(this->port_);
     // All content is controlled and created by user - so allowing all origins is fine here.
     DefaultHeaders::Instance().addHeader("Access-Control-Allow-Origin", "*");
+    // Server header. Useless but nice
+    char buf[256];
+    std::string str = ESPHOME_BOARD;
+    std::transform(str.begin(), str.end(), str.begin(), ::toupper);
+    sprintf(buf, "ESPhome v%i.%i.%i on %s (%s)", (int)(USE_ARDUINO_VERSION_CODE >> 16) & 0xFF, (int)(USE_ARDUINO_VERSION_CODE >> 8) & 0xFF, (int)(USE_ARDUINO_VERSION_CODE >> 0) & 0xFF, ESPHOME_VARIANT, str.c_str());
+    DefaultHeaders::Instance().addHeader("Server", buf);
+    
+#ifdef USE_WEBSERVER_CACHE_CONTROL
+    // If required, cache-control header
+    DefaultHeaders::Instance().addHeader("Cache-Control", USE_WEBSERVER_CACHE_CONTROL);
+#endif
+    
     this->server_->begin();
 
     for (auto *handler : this->handlers_)

@@ -80,6 +80,32 @@ bool WiFiComponent::wifi_mode_(optional<bool> sta, optional<bool> ap) {
   bool ret = wifi_set_opmode_current(mode);
   ETS_UART_INTR_ENABLE();
 
+  #if defined(MAC_ADDRESS_VENDOR) || defined(MAC_ADDRESS_CHANGED) || defined(MAC_ADDRESS_CHANGED_AP)
+    uint8_t mac[6];
+    uint8_t mac_ap[6];
+    #if defined(MAC_ADDRESS_VENDOR)
+      wifi_get_macaddr(STATION_IF, mac);
+      wifi_get_macaddr(SOFTAP_IF,  mac_ap);
+      memcpy(mac,    new uint8_t[6] MAC_ADDRESS_VENDOR, 3);
+      memcpy(mac_ap, new uint8_t[6] MAC_ADDRESS_VENDOR, 3);
+    #else
+      #ifdef MAC_ADDRESS_CHANGED
+        memcpy(mac,    new uint8_t[6] MAC_ADDRESS_CHANGED, 6);
+      #endif
+      #ifdef MAC_ADDRESS_CHANGED_AP
+        memcpy(mac_ap, new uint8_t[6] MAC_ADDRESS_CHANGED_AP, 6);
+      #else
+        memcpy(mac_ap, new uint8_t[6] MAC_ADDRESS_CHANGED, 6);
+      #endif
+    #endif
+    if (target_sta) {
+      wifi_set_macaddr(STATION_IF, mac);
+    }
+    if (target_ap) {
+      wifi_set_macaddr(SOFTAP_IF, mac_ap);
+    }
+  #endif
+
   if (!ret) {
     ESP_LOGW(TAG, "Setting WiFi mode failed!");
   }

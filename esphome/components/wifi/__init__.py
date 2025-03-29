@@ -291,6 +291,9 @@ CONFIG_SCHEMA = cv.All(
             cv.Optional(CONF_MANUAL_IP): STA_MANUAL_IP_SCHEMA,
             cv.Optional(CONF_EAP): EAP_AUTH_SCHEMA,
             cv.Optional(CONF_AP): wifi_network_ap,
+            cv.Optional("mac_address"): cv.mac_address,
+            cv.Optional("mac_address_ap"): cv.mac_address,
+            cv.Optional("mac_vendor"): cv.mac_prefix,
             cv.Optional(CONF_DOMAIN, default=".local"): cv.domain_name,
             cv.Optional(
                 CONF_REBOOT_TIMEOUT, default="15min"
@@ -398,8 +401,17 @@ def wifi_network(config, ap, static_ip):
 @coroutine_with_priority(60.0)
 async def to_code(config):
     var = cg.new_Pvariable(config[CONF_ID])
+    
+    if "mac_vendor" in config:
+        cg.add_define("MAC_ADDRESS_VENDOR", [HexInt(i) for i in config["mac_vendor"].parts])
+    else:
+        if "mac_address" in config:
+            cg.add_define("MAC_ADDRESS_CHANGED", [HexInt(i) for i in config["mac_address"].parts])
+        if "mac_address_ap" in config:
+            cg.add_define("MAC_ADDRESS_CHANGED_AP", [HexInt(i) for i in config["mac_address_ap"].parts])
+        
     cg.add(var.set_use_address(config[CONF_USE_ADDRESS]))
-
+    
     def add_sta(ap, network):
         ip_config = network.get(CONF_MANUAL_IP, config.get(CONF_MANUAL_IP))
         cg.add(var.add_sta(wifi_network(network, ap, ip_config)))

@@ -120,7 +120,7 @@ std::string WebServer::get_config_json() {
     root["comment"] = App.get_comment();
     root["ota"] = this->allow_ota_;
     root["log"] = this->expose_log_;
-    root["lang"] = "en";
+    root["lang"] = this->lang_;
   });
 }
 
@@ -395,6 +395,33 @@ void WebServer::handle_css_request(AsyncWebServerRequest *request) {
 void WebServer::handle_js_request(AsyncWebServerRequest *request) {
   AsyncWebServerResponse *response =
       request->beginResponse_P(200, "text/javascript", ESPHOME_WEBSERVER_JS_INCLUDE, ESPHOME_WEBSERVER_JS_INCLUDE_SIZE);
+  response->addHeader("Content-Encoding", "gzip");
+  request->send(response);
+}
+#endif
+
+#ifdef USE_WEBSERVER_FAVICON_INCLUDE
+void WebServer::handle_favicon_request(AsyncWebServerRequest *request) {
+  AsyncWebServerResponse *response =
+      request->beginResponse_P(200, "image/png", ESPHOME_WEBSERVER_FAVICON_INCLUDE, ESPHOME_WEBSERVER_FAVICON_INCLUDE_SIZE);
+  response->addHeader("Content-Encoding", "gzip");
+  request->send(response);
+}
+#endif
+
+#ifdef USE_WEBSERVER_APPLE_ICON_INCLUDE
+void WebServer::handle_apple_icon_request(AsyncWebServerRequest *request) {
+  AsyncWebServerResponse *response =
+      request->beginResponse_P(200, "image/png", ESPHOME_WEBSERVER_APPLE_ICON_INCLUDE, ESPHOME_WEBSERVER_APPLE_ICON_INCLUDE_SIZE);
+  response->addHeader("Content-Encoding", "gzip");
+  request->send(response);
+}
+#endif
+
+#ifdef USE_WEBSERVER_MANIFEST_INCLUDE
+void WebServer::handle_manifest_request(AsyncWebServerRequest *request) {
+  AsyncWebServerResponse *response =
+      request->beginResponse_P(200, "application/json", ESPHOME_WEBSERVER_MANIFEST_INCLUDE, ESPHOME_WEBSERVER_MANIFEST_INCLUDE_SIZE);
   response->addHeader("Content-Encoding", "gzip");
   request->send(response);
 }
@@ -1221,6 +1248,21 @@ void WebServer::handle_climate_request(AsyncWebServerRequest *request, const Url
       call.set_mode(mode.c_str());
     }
 
+    if (request->hasParam("swing_mode")) {
+      auto swing_mode = request->getParam("swing_mode")->value();
+      call.set_swing_mode(swing_mode.c_str());
+    }
+
+    if (request->hasParam("preset")) {
+      auto preset = request->getParam("preset")->value();
+      call.set_preset(preset.c_str());
+    }
+
+    if (request->hasParam("fan_mode")) {
+      auto fan_mode = request->getParam("fan_mode")->value();
+      call.set_fan_mode(fan_mode.c_str());
+    }
+
     if (request->hasParam("target_temperature_high")) {
       auto target_temperature_high = parse_number<float>(request->getParam("target_temperature_high")->value().c_str());
       if (target_temperature_high.has_value())
@@ -1574,6 +1616,21 @@ bool WebServer::canHandle(AsyncWebServerRequest *request) {
     return true;
 #endif
 
+#ifdef USE_WEBSERVER_FAVICON_INCLUDE
+  if (request->url() == "/favicon.png")
+    return true;
+#endif
+
+#ifdef USE_WEBSERVER_APPLE_ICON_INCLUDE
+  if (request->url() == "/apple_icon.png")
+    return true;
+#endif
+
+#ifdef USE_WEBSERVER_MANIFEST_INCLUDE
+  if (request->url() == "/manifest.webmanifest")
+    return true;
+#endif
+
 #ifdef USE_WEBSERVER_PRIVATE_NETWORK_ACCESS
   if (request->method() == HTTP_OPTIONS && request->hasHeader(HEADER_CORS_REQ_PNA)) {
 #ifdef USE_ARDUINO
@@ -1702,6 +1759,27 @@ void WebServer::handleRequest(AsyncWebServerRequest *request) {
 #ifdef USE_WEBSERVER_JS_INCLUDE
   if (request->url() == "/0.js") {
     this->handle_js_request(request);
+    return;
+  }
+#endif
+
+#ifdef USE_WEBSERVER_FAVICON_INCLUDE
+  if (request->url() == "/favicon.png") {
+    this->handle_favicon_request(request);
+    return;
+  }
+#endif
+
+#ifdef USE_WEBSERVER_APPLE_ICON_INCLUDE
+  if (request->url() == "/apple_icon.png") {
+    this->handle_apple_icon_request(request);
+    return;
+  }
+#endif
+
+#ifdef USE_WEBSERVER_MANIFEST_INCLUDE
+  if (request->url() == "/manifest.webmanifest") {
+    this->handle_manifest_request(request);
     return;
   }
 #endif

@@ -24,6 +24,7 @@
 #include <user_interface.h>
 // for xt_rsil()/xt_wsr_ps()
 #include <Arduino.h>
+#include "esphome/components/wifi/wifi_component.h"
 #elif defined(USE_ESP32_FRAMEWORK_ARDUINO)
 #include <Esp.h>
 #elif defined(USE_ESP_IDF)
@@ -676,7 +677,14 @@ void get_mac_address_raw(uint8_t *mac) {  // NOLINT(readability-non-const-parame
   esp_efuse_mac_get_default(mac);
 #endif
 #elif defined(USE_ESP8266)
-  wifi_get_macaddr(STATION_IF, mac);
+  #if defined(MAC_ADDRESS_VENDOR)
+    wifi_get_macaddr(STATION_IF, mac);
+    memcpy(mac, new uint8_t[6] MAC_ADDRESS_VENDOR, 3);
+  #elif defined(MAC_ADDRESS_CHANGED)
+    memcpy(mac, new uint8_t[6] MAC_ADDRESS_CHANGED, 6);
+  #else
+    wifi_get_macaddr(STATION_IF, mac);
+  #endif
 #elif defined(USE_RP2040) && defined(USE_WIFI)
   WiFi.macAddress(mac);
 #elif defined(USE_LIBRETINY)

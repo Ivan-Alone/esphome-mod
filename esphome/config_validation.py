@@ -944,6 +944,27 @@ def mac_address(value):
     return core.MACAddress(*parts_int)
 
 
+def mac_prefix(value):
+    value = string_strict(value)
+    parts = value.split(":")
+    if len(parts) != 3:
+        raise Invalid("MAC Address Vendor Prefix must consist of 3 : (colon) separated parts")
+    parts_int = []
+    if any(len(part) != 2 for part in parts):
+        raise Invalid("MAC Address Vendor Prefix must be format XX:XX:XX")
+    for part in parts:
+        try:
+            parts_int.append(int(part, 16))
+        except ValueError:
+            # pylint: disable=raise-missing-from
+            raise Invalid("MAC Address Vendor Prefix parts must be hexadecimal values from 00 to FF")
+
+    parts_int.append(0xFF)
+    parts_int.append(0xFF)
+    parts_int.append(0xFF)
+    return core.MACAddress(*parts_int)
+
+
 def bind_key(value):
     value = string_strict(value)
     parts = [value[i : i + 2] for i in range(0, len(value), 2)]

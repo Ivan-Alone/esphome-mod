@@ -30,6 +30,21 @@ extern const uint8_t ESPHOME_WEBSERVER_JS_INCLUDE[] PROGMEM;
 extern const size_t ESPHOME_WEBSERVER_JS_INCLUDE_SIZE;
 #endif
 
+#ifdef USE_WEBSERVER_FAVICON_INCLUDE
+extern const uint8_t ESPHOME_WEBSERVER_FAVICON_INCLUDE[] PROGMEM;
+extern const size_t ESPHOME_WEBSERVER_FAVICON_INCLUDE_SIZE;
+#endif
+
+#ifdef USE_WEBSERVER_APPLE_ICON_INCLUDE
+extern const uint8_t ESPHOME_WEBSERVER_APPLE_ICON_INCLUDE[] PROGMEM;
+extern const size_t ESPHOME_WEBSERVER_APPLE_ICON_INCLUDE_SIZE;
+#endif
+
+#ifdef USE_WEBSERVER_MANIFEST_INCLUDE
+extern const uint8_t ESPHOME_WEBSERVER_MANIFEST_INCLUDE[] PROGMEM;
+extern const size_t ESPHOME_WEBSERVER_MANIFEST_INCLUDE_SIZE;
+#endif
+
 namespace esphome {
 namespace web_server {
 
@@ -108,7 +123,11 @@ class WebServer : public Controller, public Component, public AsyncWebHandler {
    * @param expose_log.
    */
   void set_expose_log(bool expose_log) { this->expose_log_ = expose_log; }
-
+  /** Set default lang.
+   *
+   * @param lang.
+   */
+  void set_lang(std::string lang) { this->lang_ = lang; }
   // ========== INTERNAL METHODS ==========
   // (In most use cases you won't need these)
   /// Setup the internal web server and register handlers.
@@ -134,6 +153,21 @@ class WebServer : public Controller, public Component, public AsyncWebHandler {
 #ifdef USE_WEBSERVER_JS_INCLUDE
   /// Handle included js request under '/0.js'.
   void handle_js_request(AsyncWebServerRequest *request);
+#endif
+
+#ifdef USE_WEBSERVER_FAVICON_INCLUDE
+  /// Handle included js request under '/0.js'.
+  void handle_favicon_request(AsyncWebServerRequest *request);
+#endif
+
+#ifdef USE_WEBSERVER_APPLE_ICON_INCLUDE
+  /// Handle included js request under '/0.js'.
+  void handle_apple_icon_request(AsyncWebServerRequest *request);
+#endif
+
+#ifdef USE_WEBSERVER_MANIFEST_INCLUDE
+  /// Handle included js request under '/0.js'.
+  void handle_manifest_request(AsyncWebServerRequest *request);
 #endif
 
 #ifdef USE_WEBSERVER_PRIVATE_NETWORK_ACCESS
@@ -358,6 +392,7 @@ class WebServer : public Controller, public Component, public AsyncWebHandler {
   bool include_internal_{false};
   bool allow_ota_{true};
   bool expose_log_{true};
+  std::string lang_{"en"};
 #ifdef USE_ESP32
   std::deque<std::function<void()>> to_schedule_;
   SemaphoreHandle_t to_schedule_lock_;
