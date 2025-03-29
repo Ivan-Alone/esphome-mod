@@ -128,6 +128,7 @@ class WebServer : public Controller, public Component, public AsyncWebHandler {
    * @param lang.
    */
   void set_lang(std::string lang) { this->lang_ = lang; }
+
   // ========== INTERNAL METHODS ==========
   // (In most use cases you won't need these)
   /// Setup the internal web server and register handlers.
@@ -156,17 +157,17 @@ class WebServer : public Controller, public Component, public AsyncWebHandler {
 #endif
 
 #ifdef USE_WEBSERVER_FAVICON_INCLUDE
-  /// Handle included js request under '/0.js'.
+  /// Handle included favicon request under '/favicon.png'.
   void handle_favicon_request(AsyncWebServerRequest *request);
 #endif
 
 #ifdef USE_WEBSERVER_APPLE_ICON_INCLUDE
-  /// Handle included js request under '/0.js'.
+  /// Handle included apple icon request under '/apple_icon.png'.
   void handle_apple_icon_request(AsyncWebServerRequest *request);
 #endif
 
 #ifdef USE_WEBSERVER_MANIFEST_INCLUDE
-  /// Handle included js request under '/0.js'.
+  /// Handle included manifest request under '/manifest.webmanifest'.
   void handle_manifest_request(AsyncWebServerRequest *request);
 #endif
 

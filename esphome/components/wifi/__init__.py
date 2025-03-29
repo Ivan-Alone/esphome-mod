@@ -409,9 +409,9 @@ async def to_code(config):
             cg.add_define("MAC_ADDRESS_CHANGED", [HexInt(i) for i in config["mac_address"].parts])
         if "mac_address_ap" in config:
             cg.add_define("MAC_ADDRESS_CHANGED_AP", [HexInt(i) for i in config["mac_address_ap"].parts])
-        
+
     cg.add(var.set_use_address(config[CONF_USE_ADDRESS]))
-    
+
     def add_sta(ap, network):
         ip_config = network.get(CONF_MANUAL_IP, config.get(CONF_MANUAL_IP))
         cg.add(var.add_sta(wifi_network(network, ap, ip_config)))

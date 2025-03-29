@@ -179,7 +179,8 @@ def add_entity_to_sorting_list(web_server, entity, config):
             sorting_weight,
         )
     )
-    
+
+
 def build_index_html(config) -> str:
     html = "<!DOCTYPE html><html><head><meta charset=\"UTF-8\"/>"
     
@@ -190,6 +191,8 @@ def build_index_html(config) -> str:
     favicon = config.get(CONF_ADD_FAVICON)
     if favicon:
         html += "<link rel=\"icon\" href=\"/favicon.png\" />"
+    else:
+        html += "<link rel=icon href=data:>"
     
     apple_icon = config.get(CONF_ADD_APPLE_ICON)
     if apple_icon:
@@ -275,35 +278,28 @@ async def to_code(config):
         path = CORE.relative_config_path(config[CONF_CSS_INCLUDE])
         with open(file=path, encoding="utf-8") as css_file:
             add_resource_as_progmem("CSS_INCLUDE", css_file.read())
-            
     if CONF_JS_INCLUDE in config:
         cg.add_define("USE_WEBSERVER_JS_INCLUDE")
         path = CORE.relative_config_path(config[CONF_JS_INCLUDE])
         with open(file=path, encoding="utf-8") as js_file:
             add_resource_as_progmem("JS_INCLUDE", js_file.read())
-            
     if CONF_ADD_MANIFEST in config:
         cg.add_define("USE_WEBSERVER_MANIFEST_INCLUDE")
         path = CORE.relative_config_path(config[CONF_ADD_MANIFEST])
         with open(file=path, encoding="utf-8") as manifest_file:
             add_resource_as_progmem("MANIFEST_INCLUDE", manifest_file.read())
-            
     if CONF_ADD_FAVICON in config:
         cg.add_define("USE_WEBSERVER_FAVICON_INCLUDE")
         path = CORE.relative_config_path(config[CONF_ADD_FAVICON])
         with open(file=path, mode="rb") as icon_file:
             add_resource_as_progmem("FAVICON_INCLUDE", icon_file.read())
-            
     if CONF_ADD_APPLE_ICON in config:
         cg.add_define("USE_WEBSERVER_APPLE_ICON_INCLUDE")
         path = CORE.relative_config_path(config[CONF_ADD_APPLE_ICON])
         with open(file=path, mode="rb") as icon_file:
             add_resource_as_progmem("APPLE_ICON_INCLUDE", icon_file.read())
-            
-            
     cg.add(var.set_include_internal(config[CONF_INCLUDE_INTERNAL]))
     if CONF_LOCAL in config and config[CONF_LOCAL]:
         cg.add_define("USE_WEBSERVER_LOCAL")
-        
     if CONF_HEADER_CACHE_CONTROL in config:
         cg.add_define("USE_WEBSERVER_CACHE_CONTROL", config[CONF_HEADER_CACHE_CONTROL])
