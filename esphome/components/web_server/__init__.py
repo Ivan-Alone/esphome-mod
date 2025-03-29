@@ -13,6 +13,13 @@ from esphome.const import (
     CONF_ID,
     CONF_JS_INCLUDE,
     CONF_JS_URL,
+    CONF_ADD_HEAD,
+    CONF_ADD_BODY,
+    CONF_ADD_FAVICON,
+    CONF_ADD_APPLE_ICON,
+    CONF_ADD_MANIFEST,
+    CONF_LANG,
+    CONF_HEADER_CACHE_CONTROL,
     CONF_ENABLE_PRIVATE_NETWORK_ACCESS,
     CONF_PORT,
     CONF_AUTH,
@@ -119,14 +126,13 @@ CONFIG_SCHEMA = cv.All(
             cv.Optional(CONF_CSS_URL): cv.string,
             cv.Optional(CONF_CSS_INCLUDE): cv.file_,
             cv.Optional(CONF_JS_URL): cv.string,
-            cv.Optional("html"): cv.string,
-            cv.Optional("head"): cv.string,
-            cv.Optional("apple_icon"): cv.string,
-            cv.Optional("favicon"): cv.string,
-            cv.Optional("manifest"): cv.string,
-            cv.Optional("color_accent"): cv.string,
-            cv.Optional("lang"): cv.string,
-            cv.Optional("cache_control"): cv.string,
+            cv.Optional(CONF_ADD_BODY): cv.string,
+            cv.Optional(CONF_ADD_HEAD): cv.string,
+            cv.Optional(CONF_ADD_APPLE_ICON): cv.string,
+            cv.Optional(CONF_ADD_FAVICON): cv.string,
+            cv.Optional(CONF_ADD_MANIFEST): cv.string,
+            cv.Optional(CONF_LANG): cv.string,
+            cv.Optional(CONF_HEADER_CACHE_CONTROL): cv.string,
             cv.Optional(CONF_JS_INCLUDE): cv.file_,
             cv.Optional(CONF_ENABLE_PRIVATE_NETWORK_ACCESS, default=True): cv.boolean,
             cv.Optional(CONF_AUTH): cv.Schema(
@@ -176,35 +182,23 @@ def add_entity_to_sorting_list(web_server, entity, config):
     
 def build_index_html(config) -> str:
     html = "<!DOCTYPE html><html><head><meta charset=\"UTF-8\"/>"
-    html += "<meta name=\"viewport\" content=\"width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no\" />"
     
-    color_accent = config.get("color_accent")
-    if color_accent:
-        html += "<meta name=\"msapplication-TileColor\" content=\""
-        html += color_accent
-        html += "\" />"
+    head = config.get(CONF_ADD_HEAD)
+    if head:
+        html += head
     
-    
-    html += "<meta name=\"apple-mobile-web-app-capable\" content=\"yes\" />"
-    html += "<meta name=\"mobile-web-app-capable\" content=\"yes\" />"
-    
-    favicon = config.get("favicon")
+    favicon = config.get(CONF_ADD_FAVICON)
     if favicon:
         html += "<link rel=\"icon\" href=\"/favicon.png\" />"
     
-    apple_icon = config.get("apple_icon")
+    apple_icon = config.get(CONF_ADD_APPLE_ICON)
     if apple_icon:
         html += "<link rel=\"apple-touch-icon\" href=\"/apple_icon.png\" />"
         html += "<link rel=\"apple-touch-startup-image\" href=\"/apple_icon.png\" />"
         
-    manifest = config.get("manifest")
+    manifest = config.get(CONF_ADD_MANIFEST)
     if manifest:
         html += "<link rel=\"manifest\" crossorigin=\"use-credentials\" href=\"/manifest.webmanifest\"/>"
-        
-    
-    head = config.get("head")
-    if head:
-        html += head
     
     css_include = config.get(CONF_CSS_INCLUDE)
     js_include = config.get(CONF_JS_INCLUDE)
@@ -214,7 +208,7 @@ def build_index_html(config) -> str:
         html += f'<link rel=stylesheet href="{config[CONF_CSS_URL]}">'
     html += "</head><body>"
     
-    html_extra = config.get("html")
+    html_extra = config.get(CONF_ADD_BODY)
     if html_extra:
         html += html_extra
     
@@ -269,8 +263,8 @@ async def to_code(config):
         cg.add(var.set_js_url(config[CONF_JS_URL]))
     cg.add(var.set_allow_ota(config[CONF_OTA]))
     cg.add(var.set_expose_log(config[CONF_LOG]))
-    if "lang" in config:
-        cg.add(var.set_lang(config["lang"]))
+    if CONF_LANG in config:
+        cg.add(var.set_lang(config[CONF_LANG]))
     if config[CONF_ENABLE_PRIVATE_NETWORK_ACCESS]:
         cg.add_define("USE_WEBSERVER_PRIVATE_NETWORK_ACCESS")
     if CONF_AUTH in config:
@@ -288,21 +282,21 @@ async def to_code(config):
         with open(file=path, encoding="utf-8") as js_file:
             add_resource_as_progmem("JS_INCLUDE", js_file.read())
             
-    if "manifest" in config:
+    if CONF_ADD_MANIFEST in config:
         cg.add_define("USE_WEBSERVER_MANIFEST_INCLUDE")
-        path = CORE.relative_config_path(config["manifest"])
+        path = CORE.relative_config_path(config[CONF_ADD_MANIFEST])
         with open(file=path, encoding="utf-8") as manifest_file:
             add_resource_as_progmem("MANIFEST_INCLUDE", manifest_file.read())
             
-    if "favicon" in config:
+    if CONF_ADD_FAVICON in config:
         cg.add_define("USE_WEBSERVER_FAVICON_INCLUDE")
-        path = CORE.relative_config_path(config["favicon"])
+        path = CORE.relative_config_path(config[CONF_ADD_FAVICON])
         with open(file=path, mode="rb") as icon_file:
             add_resource_as_progmem("FAVICON_INCLUDE", icon_file.read())
             
-    if "apple_icon" in config:
+    if CONF_ADD_APPLE_ICON in config:
         cg.add_define("USE_WEBSERVER_APPLE_ICON_INCLUDE")
-        path = CORE.relative_config_path(config["apple_icon"])
+        path = CORE.relative_config_path(config[CONF_ADD_APPLE_ICON])
         with open(file=path, mode="rb") as icon_file:
             add_resource_as_progmem("APPLE_ICON_INCLUDE", icon_file.read())
             
@@ -311,5 +305,5 @@ async def to_code(config):
     if CONF_LOCAL in config and config[CONF_LOCAL]:
         cg.add_define("USE_WEBSERVER_LOCAL")
         
-    if "cache_control" in config:
-        cg.add_define("USE_WEBSERVER_CACHE_CONTROL", config["cache_control"])
+    if CONF_HEADER_CACHE_CONTROL in config:
+        cg.add_define("USE_WEBSERVER_CACHE_CONTROL", config[CONF_HEADER_CACHE_CONTROL])
