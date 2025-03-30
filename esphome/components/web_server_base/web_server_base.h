@@ -96,11 +96,6 @@ class WebServerBase : public Component {
     sprintf(buf, "ESPhome v%i.%i.%i on %s (%s)", (int)(USE_ARDUINO_VERSION_CODE >> 16) & 0xFF, (int)(USE_ARDUINO_VERSION_CODE >> 8) & 0xFF, (int)(USE_ARDUINO_VERSION_CODE >> 0) & 0xFF, ESPHOME_VARIANT, str.c_str());
     DefaultHeaders::Instance().addHeader("Server", buf);
     
-#ifdef USE_WEBSERVER_CACHE_CONTROL
-    // If required, cache-control header
-    DefaultHeaders::Instance().addHeader("Cache-Control", USE_WEBSERVER_CACHE_CONTROL);
-#endif
-    
     this->server_->begin();
 
     for (auto *handler : this->handlers_)

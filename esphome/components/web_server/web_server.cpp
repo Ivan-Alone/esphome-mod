@@ -178,12 +178,18 @@ float WebServer::get_setup_priority() const { return setup_priority::WIFI - 1.0f
 #ifdef USE_WEBSERVER_LOCAL
 void WebServer::handle_index_request(AsyncWebServerRequest *request) {
   AsyncWebServerResponse *response = request->beginResponse_P(200, "text/html", INDEX_GZ, sizeof(INDEX_GZ));
+#ifdef USE_WEBSERVER_CACHE_CONTROL
+  response->addHeader("Cache-Control", USE_WEBSERVER_CACHE_CONTROL);
+#endif
   response->addHeader("Content-Encoding", "gzip");
   request->send(response);
 }
 #elif USE_WEBSERVER_VERSION == 1
 void WebServer::handle_index_request(AsyncWebServerRequest *request) {
   AsyncResponseStream *stream = request->beginResponseStream("text/html");
+#ifdef USE_WEBSERVER_CACHE_CONTROL
+  stream->addHeader("Cache-Control", USE_WEBSERVER_CACHE_CONTROL);
+#endif
   const std::string &title = App.get_name();
   stream->print(F("<!DOCTYPE html><html lang=\"en\"><head><meta charset=UTF-8><meta "
                   "name=viewport content=\"width=device-width, initial-scale=1,user-scalable=no\"><title>"));
@@ -366,6 +372,9 @@ void WebServer::handle_index_request(AsyncWebServerRequest *request) {
 void WebServer::handle_index_request(AsyncWebServerRequest *request) {
   AsyncWebServerResponse *response =
       request->beginResponse_P(200, "text/html", ESPHOME_WEBSERVER_INDEX_HTML, ESPHOME_WEBSERVER_INDEX_HTML_SIZE);
+#ifdef USE_WEBSERVER_CACHE_CONTROL
+  response->addHeader("Cache-Control", USE_WEBSERVER_CACHE_CONTROL);
+#endif
   // No gzip header here because the HTML file is so small
   request->send(response);
 }
@@ -386,6 +395,9 @@ void WebServer::handle_pna_cors_request(AsyncWebServerRequest *request) {
 void WebServer::handle_css_request(AsyncWebServerRequest *request) {
   AsyncWebServerResponse *response =
       request->beginResponse_P(200, "text/css", ESPHOME_WEBSERVER_CSS_INCLUDE, ESPHOME_WEBSERVER_CSS_INCLUDE_SIZE);
+#ifdef USE_WEBSERVER_CACHE_CONTROL
+  response->addHeader("Cache-Control", USE_WEBSERVER_CACHE_CONTROL);
+#endif
   response->addHeader("Content-Encoding", "gzip");
   request->send(response);
 }
@@ -395,6 +407,9 @@ void WebServer::handle_css_request(AsyncWebServerRequest *request) {
 void WebServer::handle_js_request(AsyncWebServerRequest *request) {
   AsyncWebServerResponse *response =
       request->beginResponse_P(200, "text/javascript", ESPHOME_WEBSERVER_JS_INCLUDE, ESPHOME_WEBSERVER_JS_INCLUDE_SIZE);
+#ifdef USE_WEBSERVER_CACHE_CONTROL
+  response->addHeader("Cache-Control", USE_WEBSERVER_CACHE_CONTROL);
+#endif
   response->addHeader("Content-Encoding", "gzip");
   request->send(response);
 }
@@ -404,6 +419,9 @@ void WebServer::handle_js_request(AsyncWebServerRequest *request) {
 void WebServer::handle_favicon_request(AsyncWebServerRequest *request) {
   AsyncWebServerResponse *response =
       request->beginResponse_P(200, "image/png", ESPHOME_WEBSERVER_FAVICON_INCLUDE, ESPHOME_WEBSERVER_FAVICON_INCLUDE_SIZE);
+#ifdef USE_WEBSERVER_CACHE_CONTROL
+  response->addHeader("Cache-Control", USE_WEBSERVER_CACHE_CONTROL);
+#endif
   response->addHeader("Content-Encoding", "gzip");
   request->send(response);
 }
@@ -413,6 +431,9 @@ void WebServer::handle_favicon_request(AsyncWebServerRequest *request) {
 void WebServer::handle_apple_icon_request(AsyncWebServerRequest *request) {
   AsyncWebServerResponse *response =
       request->beginResponse_P(200, "image/png", ESPHOME_WEBSERVER_APPLE_ICON_INCLUDE, ESPHOME_WEBSERVER_APPLE_ICON_INCLUDE_SIZE);
+#ifdef USE_WEBSERVER_CACHE_CONTROL
+  response->addHeader("Cache-Control", USE_WEBSERVER_CACHE_CONTROL);
+#endif
   response->addHeader("Content-Encoding", "gzip");
   request->send(response);
 }
@@ -422,6 +443,9 @@ void WebServer::handle_apple_icon_request(AsyncWebServerRequest *request) {
 void WebServer::handle_manifest_request(AsyncWebServerRequest *request) {
   AsyncWebServerResponse *response =
       request->beginResponse_P(200, "application/json", ESPHOME_WEBSERVER_MANIFEST_INCLUDE, ESPHOME_WEBSERVER_MANIFEST_INCLUDE_SIZE);
+#ifdef USE_WEBSERVER_CACHE_CONTROL
+  response->addHeader("Cache-Control", USE_WEBSERVER_CACHE_CONTROL);
+#endif
   response->addHeader("Content-Encoding", "gzip");
   request->send(response);
 }
