@@ -23,7 +23,7 @@ ruamel.yaml==0.18.6 # dashboard_import
 kconfiglib==13.7.1
 
 # esp-idf >= 5.0 requires this
-pyparsing >= 3.0
+pyparsing >= 3.3.3
 
 # For autocompletion
 argcomplete>=2.0.0
